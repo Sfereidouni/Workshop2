@@ -21,7 +21,7 @@ Material:
     m_Floats:
     - _distance: 0
     - _feather: 0.87
-    - _width: 0.2
+    - _width: 0.03
     m_Colors:
     - _Color: {r: 1, g: 0, b: 0.5, a: 0}
     - _color: {r: 0.828, g: 0.066176474, b: 1, a: 0.759}

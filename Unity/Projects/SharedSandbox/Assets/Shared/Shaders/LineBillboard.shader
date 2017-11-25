@@ -13,33 +13,30 @@ Geometry shader tutorial
 https://takinginitiative.wordpress.com/2011/01/12/directx10-tutorial-9-the-geometry-shader/
 */
 
-Shader "Custom/LineBillboard"
+Shader "RC3/LineBillboard"
 {
 	Properties
 	{
-		_color("Color", Color) = (1.0, 1.0, 1.0, 1.0)
-		_distance("Distance", Float) = 0.0
-		_feather("Feather", Range(0.0, 5.0)) = 1.0
-		_width("Width", Range(0.0,10.0)) = 1.0
+		_texture("Texture", 2D) = ""{}
+		_u0("U0", Range(0.0, 1.0)) = 0.0
+		_u1("U1", Range(0.0, 1.0)) = 1.0
+        _width("Width", Range(0.0, 1.0)) = 1.0
 	}
 
 	SubShader
 	{
 		Pass
 		{
-			//Tags{ "Queue" = "Transparent" "RenderType" = "Opaque" "IgnoreProjector" = "True" }
-			//Blend SrcAlpha OneMinusSrcAlpha // typical transparency
-			//LOD 200
-
-			Tags{ "RenderType" = "Opaque" }
-			LOD 200
+			Tags{ "RenderType" = "Opaque" "Queue" = "Transparent" "IgnoreProjector" = "True" }
+			Blend SrcAlpha OneMinusSrcAlpha // typical transparency
+			LOD 100
 
 			CGPROGRAM
 
 			#pragma target 5.0
-			#pragma vertex VS_Main
-			#pragma geometry GS_Main
-			#pragma fragment FS_Main
+			#pragma vertex Vert
+			#pragma geometry Geom
+			#pragma fragment Frag
 
 			#include "UnityCG.cginc"
 
@@ -47,28 +44,28 @@ Shader "Custom/LineBillboard"
 			Variables
 			*/
 
-			float4 _color;
-			float _distance;
-			float _feather;
+			sampler2D _texture;
+			float _u0;
+			float _u1;
 			float _width;
 
 			/*
 			Data types
 			*/
 
-			struct VS_Input
+			struct VertData
 			{
 				float4 pos : POSITION;
 				float2 uv0 : TEXCOORD0;
 			};
 
-			struct GS_Input
+			struct GeomData
 			{
 				float4 pos : POSITION;
 				float2 uv0 : TEXCOORD0;
 			};
 
-			struct FS_Input
+			struct FragData
 			{
 				float4 pos : POSITION;
 				float2 uv0 : TEXCOORD0;
@@ -78,23 +75,28 @@ Shader "Custom/LineBillboard"
 			Helper functions
 			*/
 
-
+			float ramp(float t, float t0, float t1)
+			{
+				return saturate((t - t0) / (t1 - t0));
+			}
 
 			/*
 			Main
 			*/
 
-			GS_Input VS_Main(VS_Input v)
+			// Vertex shader
+			GeomData Vert(VertData v)
 			{
-				GS_Input g;
+				GeomData g;
 				g.pos = mul(unity_ObjectToWorld, v.pos);
-				g.uv0 = v.uv0;
+				g.uv0 = ramp(v.uv0.x, _u0, _u1);
 				return g;
 			}
 
 
+			// Geometry shader
 			[maxvertexcount(4)]
-			void GS_Main(line GS_Input g[2], inout TriangleStream<FS_Input> stream)
+			void Geom(line GeomData g[2], inout TriangleStream<FragData> stream)
 			{
 				float3 cam = _WorldSpaceCameraPos;
 
@@ -102,39 +104,35 @@ Shader "Custom/LineBillboard"
 				float3 p1 = g[1].pos;
 
 				float3 x = p1 - p0;
-				float3 y = cross(p0 - cam, x);
-
-				// offset vectors
-				x = normalize(x) * _width;
-				y = normalize(y) * _width;
+				float3 y0 = normalize(cross(x, cam - p0)) * _width;
+				float3 y1 = normalize(cross(x, cam - p1)) * _width;
 
 				// append to stream
-				FS_Input f;
+				FragData f;
 				float4x4 vp = UNITY_MATRIX_VP;
 
 				f.uv0 = g[0].uv0;
 
-				f.pos = mul(vp, float4(p0 - x - y, 1.0));
+				f.pos = mul(vp, float4(p0 - y0, 1.0));
 				stream.Append(f);
 
-				f.pos = mul(vp, float4(p0 + x - y, 1.0));
+				f.pos = mul(vp, float4(p0 + y0, 1.0));
 				stream.Append(f);
 
 				f.uv0 = g[1].uv0;
 
-				f.pos = mul(vp, float4(p1 + x + y, 1.0));
+				f.pos = mul(vp, float4(p1 - y1, 1.0));
 				stream.Append(f);
 
-				f.pos = mul(vp, float4(p1 - x + y, 1.0));
+				f.pos = mul(vp, float4(p1 + y1, 1.0));
 				stream.Append(f);
 			}
 
 
-			float4 FS_Main(FS_Input f) : COLOR
+			// Fragment shader
+			float4 Frag(FragData f) : COLOR
 			{
-				//float t = smoothstep(_distance - _feather, _distance + _feather, f.uv0);
-				//return float4(_color.xyz, t);
-				return _color;
+				return tex2D(_texture, f.uv0);
 			}
 
 			ENDCG
