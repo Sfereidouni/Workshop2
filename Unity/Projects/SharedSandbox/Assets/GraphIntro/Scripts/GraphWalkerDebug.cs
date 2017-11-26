@@ -4,6 +4,7 @@ using UnityEngine;
 
 using SpatialSlur.SlurCore;
 using SpatialSlur.SlurMesh;
+using SpatialSlur.SlurUnity;
 
 /*
  * Notes
@@ -14,11 +15,8 @@ namespace GraphIntro
     /// <summary>
     /// 
     /// </summary>
-    public class GraphWalkerDebug : MonoBehaviour
+    public class GraphWalkerDebug : MonoBehaviour, IFollowable
     {
-        public Transform CameraPivot;
-        private float _followStiffness = 5.0f;
-
         private HeGraph3d _graph;
         private int[] _vertexState;
         private bool _initialized = false;
@@ -37,6 +35,15 @@ namespace GraphIntro
         private float[] _radii = new float[] { 0.05f, 0.1f, 0.2f, 0.2f };
         private int _countX = 10;
         private int _countY = 10;
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Vector3 Position
+        {
+            get { return (Vector3) _currVertex.Position; }
+        }
 
 
         /// <summary>
@@ -113,7 +120,6 @@ namespace GraphIntro
             }
 
             UpdateNeighborhood();
-            FollowVertex();
         }
 
 
@@ -132,16 +138,6 @@ namespace GraphIntro
             
             _vertexState[_currHedge.End.Index] = 2;
             _vertexState[_currVertex.Index] = 3; // set state of current vertex
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void FollowVertex()
-        {
-            var p = (Vector3)_currVertex.Position;
-            CameraPivot.position = Vector3.Lerp(CameraPivot.position, p, Time.deltaTime * _followStiffness);
         }
 
     
@@ -165,13 +161,13 @@ namespace GraphIntro
                 Gizmos.DrawSphere(p, _radii[state]);
             }
 
+            Gizmos.color = _colors[0];
+
             // draw edge lines
             foreach(var he in _graph.Edges)
             {
                 Vector3 p0 = (Vector3)he.Start.Position;
                 Vector3 p1 = (Vector3)he.End.Position;
-
-                Gizmos.color = _colors[0];
                 Gizmos.DrawLine(p0, p1);
             }
         }

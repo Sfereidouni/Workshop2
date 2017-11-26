@@ -217,12 +217,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 242f73264be762d4195ea72292a4e920, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraPivot: {fileID: 1450535043}
---- !u!4 &1450535043 stripped
-Transform:
-  m_PrefabParentObject: {fileID: 4321685726713428, guid: 61df94e1ef0283d42bb6cbfa4cb332ed,
-    type: 2}
-  m_PrefabInternal: {fileID: 2085921652}
 --- !u!1001 &2085921652
 Prefab:
   m_ObjectHideFlags: 0
@@ -262,6 +256,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114089373801381218, guid: 61df94e1ef0283d42bb6cbfa4cb332ed,
+        type: 2}
+      propertyPath: Target
+      value: 
+      objectReference: {fileID: 1283032159}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 61df94e1ef0283d42bb6cbfa4cb332ed, type: 2}
   m_IsPrefabParent: 0

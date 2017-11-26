@@ -10,7 +10,7 @@ using UnityEngine;
  * Notes
  */ 
 
-namespace MyAwesomeLibrary
+namespace SpatialSlur.SlurUnity
 {
     /// <summary>
     /// 
