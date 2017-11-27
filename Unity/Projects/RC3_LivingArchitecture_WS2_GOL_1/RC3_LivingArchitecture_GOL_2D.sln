@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RC3_LivingArchitecture_GOL_2D", "RC3_LivingArchitecture_GOL_2D.csproj", "{30E1B5D8-5447-0803-6A34-03ADA8357A08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RC3_LivingArchitecture_GOL_2D.Editor", "RC3_LivingArchitecture_GOL_2D.Editor.csproj", "{5C763638-7DAE-803E-A4FF-965BD31CC977}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30E1B5D8-5447-0803-6A34-03ADA8357A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30E1B5D8-5447-0803-6A34-03ADA8357A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30E1B5D8-5447-0803-6A34-03ADA8357A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30E1B5D8-5447-0803-6A34-03ADA8357A08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C763638-7DAE-803E-A4FF-965BD31CC977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C763638-7DAE-803E-A4FF-965BD31CC977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C763638-7DAE-803E-A4FF-965BD31CC977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C763638-7DAE-803E-A4FF-965BD31CC977}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
