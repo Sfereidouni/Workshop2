@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Environment : MonoBehaviour {
+public class Environment_2 : MonoBehaviour {
 
 	// VARIABLES
 
@@ -48,81 +48,86 @@ public class Environment : MonoBehaviour {
 		height = timeEnd;
         // Create a new CA grid
         CreateGrid ();
-        //setupNeighbors3d();
+        SetupNeighbors3d();
+
 
     }
 	
 	// Update is called once per frame
 	void Update () {
-        // Calculate the CA state, save the new state, display the CA and increment time frame
-        if (currentFrame < timeEnd - 1)
-        {
-            if (pause == false)
-            {
 
-            
-            // Calculate the future state of the voxels
-            CalculateCA();
-            // Update the voxels that are printing
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < length; j++)
-                {
-                    GameObject currentVoxel = voxelGrid[i, j, 0];
-                    currentVoxel.GetComponent<Voxel>().UpdateVoxel();
-                }
-
-            }
-            // Save the CA state
-            SaveCA();
-
-                // Increment the current frame count
-            currentFrame++;
-            }
-
-            // Display the printed voxels
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < length; j++)
-                {
-                    for (int k = 1; k < height; k++)
-                    {
-                        voxelGrid[i, j, k].GetComponent<Voxel>().VoxelDisplay();
-                    }
-                }
-            }
-        }
-        // Spin the CA if spacebar is pressed (be careful, GPU instancing will be lost!)
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (gameObject.GetComponent<ModelDisplay>() == null)
-            {
-                gameObject.AddComponent<ModelDisplay>();
-            }
-            else 
-            {
-                Destroy(gameObject.GetComponent<ModelDisplay>());
-            }
-        }
-
-        //toggle pause with "p" key
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            if (pause == false)
-            {
-                pause = true;
-            }
-            else
-            {
-                pause = false;
-            }
-        }
-
+        VonNeumannLookup();
+        MooreLookup();
 
     }
 
-	// Create grid function
-	void CreateGrid(){
+    /// <summary>
+    /// TESTING VON NEUMANN NEIGHBORS
+    /// We can look at the specific voxels above,below,left,right,front,back and color....
+    /// We can get all von neumann neighbors and color
+    /// </summary>
+    /// 
+    void VonNeumannLookup()
+    {
+        //color specific voxel in the grid - [1,1,1]
+        GameObject voxel_1 = voxelGrid[1, 1, 1];
+        voxel_1.GetComponent<Voxel>().SetState(1);
+        voxel_1.GetComponent<Voxel>().VoxelDisplay(1, 0, 0);
+        
+        //color specific voxel in the grid - [10,10,10]
+        GameObject voxel_2 = voxelGrid[10, 10, 10];
+        voxel_2.GetComponent<Voxel>().SetState(1);
+        voxel_2.GetComponent<Voxel>().VoxelDisplay(1, 0, 0);
+
+        //get neighbor right and color green
+        Voxel voxel_1right = voxel_1.GetComponent<Voxel>().getVoxelRight();
+        voxel_1right.SetState(1);
+        voxel_1right.VoxelDisplay(0, 1, 0);
+        
+        //get neighbor above and color green
+        Voxel voxel_1above = voxel_1.GetComponent<Voxel>().getVoxelAbove();
+        voxel_1above.SetState(1);
+        voxel_1above.VoxelDisplay(1, 0, 1);
+
+        //get neighbor above and color magenta
+        Voxel voxel_2above = voxel_2.GetComponent<Voxel>().getVoxelAbove();
+        voxel_2above.SetState(1);
+        voxel_2above.VoxelDisplay(1, 0, 1);
+
+        //get all VN neighbors of a cell and color yellow
+        //color specific voxel in the grid - [12,12,12]
+        GameObject voxel_3 = voxelGrid[12, 12, 12];
+        Voxel[] tempVNNeighbors = voxel_3.GetComponent<Voxel>().getNeighbors3dVN();
+        foreach (Voxel vox in tempVNNeighbors)
+        {
+            vox.SetState(1);
+            vox.VoxelDisplay(1, 1, 0);
+        }
+        
+
+    }
+
+    /// <summary>
+    /// TESTING MOORES NEIGHBORS
+    /// We can look at the specific voxels above,below,left,right,front,back and color....
+    /// We can get all von neumann neighbors and color
+    /// </summary>
+    /// 
+    void MooreLookup()
+    {
+        //get all MO neighbors of a cell and color CYAN
+        //color specific voxel in the grid - [14,14,14]
+        GameObject voxel_1 = voxelGrid[14, 14, 14];
+        Voxel[] tempMONeighbors = voxel_1.GetComponent<Voxel>().getNeighbors3dMO();
+        foreach (Voxel vox in tempMONeighbors)
+        {
+            vox.SetState(1);
+            vox.VoxelDisplay(0, 1, 1);
+        }
+
+    }
+    // Create grid function
+    void CreateGrid(){
 		// Allocate space in memory for the array
 		voxelGrid = new GameObject[width, length, height];
 		// Populate the array with voxels from a base image
@@ -220,9 +225,85 @@ public class Environment : MonoBehaviour {
 	}
 
     /// <summary>
-    /// SETUP AND STORE MOORES AND VON NEUMANN NEIGHBORS
+    /// SETUP MOORES & VON NEUMANN 3D NEIGHBORS
     /// </summary>
-    void setupNeighbors3d()
+    void SetupNeighbors3d()
+    {
+        for (int i = 1; i < width-1; i++)
+        {
+            for (int j = 1; j < length-1; j++)
+            {
+                for (int k = 1; k < height-1; k++)
+                {
+                    //the current voxel we are looking at...
+                    GameObject currentVoxelObj = voxelGrid[i, j, k];
+
+                    ////SETUP Von Neumann Neighborhood Cells////
+                    Voxel[] tempNeighborsVN = new Voxel[6];
+
+                    //left
+                    Voxel VoxelLeft = voxelGrid[i - 1, j, k].GetComponent<Voxel>();
+                    currentVoxelObj.GetComponent<Voxel>().setVoxelLeft(VoxelLeft);
+                    tempNeighborsVN[0] = VoxelLeft;
+
+                    //right
+                    Voxel VoxelRight = voxelGrid[i + 1, j, k].GetComponent<Voxel>();
+                    currentVoxelObj.GetComponent<Voxel>().setVoxelRight(VoxelRight);
+                    tempNeighborsVN[2] = VoxelRight;
+
+                    //back
+                    Voxel VoxelBack = voxelGrid[i, j - 1, k].GetComponent<Voxel>();
+                    currentVoxelObj.GetComponent<Voxel>().setVoxelBack(VoxelBack);
+                    tempNeighborsVN[3] = VoxelBack;
+
+                    //front
+                    Voxel VoxelFront = voxelGrid[i, j + 1, k].GetComponent<Voxel>();
+                    currentVoxelObj.GetComponent<Voxel>().setVoxelFront(VoxelFront);
+                    tempNeighborsVN[1] = VoxelFront;
+
+                    //below
+                    Voxel VoxelBelow = voxelGrid[i, j, k - 1].GetComponent<Voxel>();
+                    currentVoxelObj.GetComponent<Voxel>().setVoxelBelow(VoxelBelow);
+                    tempNeighborsVN[4] = VoxelBelow;
+
+                    //above
+                    Voxel VoxelAbove = voxelGrid[i, j, k + 1].GetComponent<Voxel>();
+                    currentVoxelObj.GetComponent<Voxel>().setVoxelAbove(VoxelAbove);
+                    tempNeighborsVN[5] = VoxelAbove;
+
+                    //Set the Von Neumann Neighbors [] in this Voxel
+                    currentVoxelObj.GetComponent<Voxel>().setNeighbors3dVN(tempNeighborsVN);
+
+                    ////SETUP Moore's Neighborhood////
+                    Voxel[] tempNeighborsMO = new Voxel[26];
+
+                    int tempcount = 0;
+                    for (int m = -1; m < 2; m++)
+                    {
+                        for (int n = -1; n < 2; n++)
+                        {
+                            for (int p = -1; p < 2; p++)
+                            {
+                                if ((i + m >= 0) && (i + m < width) && (j + n >= 0) && (j + n < length) && (k + p >= 0) && (k + p < height))
+                                {
+                                    GameObject neighborVoxelObj = voxelGrid[i + m, j + n, k + p];
+                                    if (neighborVoxelObj != currentVoxelObj)
+                                    {
+                                        Voxel neighborvoxel = voxelGrid[i + m, j + n, k + p].GetComponent<Voxel>();
+                                        tempNeighborsMO[tempcount] = neighborvoxel;
+                                        tempcount++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    currentVoxelObj.GetComponent<Voxel>().setNeighbors3dMO(tempNeighborsMO);
+                }
+            }
+        }
+    }
+
+    void updateDensities()
     {
         for (int i = 0; i < width; i++)
         {
@@ -230,29 +311,8 @@ public class Environment : MonoBehaviour {
             {
                 for (int k = 0; k < height; k++)
                 {
-                    //setup Von Neumann Neighborhood Cells
+                    GameObject currentVoxel = voxelGrid[i, j, k];
 
-
-                    //setup Moore's Neighborhood
-                    GameObject currentVoxelObj = voxelGrid[i, j, k];
-                    for (int m = 0; m < height; m++)
-                    {
-                        for (int n = 0; n < height; n++)
-                        {
-                            for (int p = 0; p < height; p++)
-                            {
-                                if ((i + m >= 0) && (i + m < width) && (j + n >= 0) && (j + n < length) && (k + p >= 0) && (k + p < height))
-                                {
-                                    GameObject neighborVoxelObj = voxelGrid[i + m, j + n, k + p];
-                                    if (neighborVoxelObj != currentVoxelObj)
-                                    {
-                                        //Voxel neighborvoxel = voxelGrid[i + m, j + n, k + p].GetComponent<Voxel>();
-                                        currentVoxelObj.GetComponent<Voxel>().neighbors3d_MO.Add(neighborVoxelObj);
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
